@@ -3,14 +3,16 @@ package com.sqllite;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.util.*;
 
 public class readFile {
 	String fname = "D://CODE/JavaWeb/Sqlite/src/com/sqllite/max.txt";
 	DBOP dbop = new DBOP();//连接数据库
+	private BufferedReader br;
 
 	
 	
@@ -49,60 +51,10 @@ public class readFile {
 	}
 	
 	
-	/*读取选项*/
-	void readItem() throws IOException, SQLException
-	{
-		String sql;
-		
-		@SuppressWarnings("resource")
-		BufferedReader br=new BufferedReader(new InputStreamReader(new FileInputStream(fname),"UTF-8"));
-		char c =  ' ';
-		List<String> list = new ArrayList<String>();
-		int ch;
-		String str = "";
-		String s = "";
-		while((ch=br.read())!=-1)
-		{	
-			c = (char)ch;
-			if(ch>=65&&ch<=69)
-			{
-				ch = br.read();
-				if(ch==65294||ch==46||ch==12289)//65294是“.”的UTF-8编码
-				{
-					str = "";
-					s = "";
-					while((ch=br.read())!=10)
-					{
-						c = (char)ch;
-						s = String.valueOf(c);
-						str = str+s;
-						
-					}
-					list.add(str);
-					//System.out.println(str);
-				}
-			}
-		}
-		Iterator<String> it = list.iterator();
-		int flag = 1;
-		String item = "";
-		while(it.hasNext())
-		{
-			item = it.next();
-			System.out.println(item);
-			
-			
-		}
-
-		
-		
-	}
-	
-	/*读取题干和选项*/
+		/*读取题干和选项*/
 	void readData() throws IOException, SQLException
 	{	
-		//读取文件内容
-		BufferedReader br=new BufferedReader(new InputStreamReader(new FileInputStream(fname),"UTF-8"));
+		br = new BufferedReader(new InputStreamReader(new FileInputStream(fname),"UTF-8"));
 		String sql;
 		char c =  ' ';//临时储存读出来的单个字符
 		String str = "";//临时储存题目的题干字符串
@@ -161,7 +113,7 @@ public class readFile {
 			sql = "INSERT INTO examSelect (question) " +
 	                   "VALUES ('" + str + "');"; 
 	     	dbop.excute(sql);
-			//System.out.println("Insert successfully!");
+			System.out.print("=");
 			//if(str!="") System.out.println(str);
 			String id = dbop.selectId("SELECT ID FROM examSelect WHERE question = '"+str+"'");
 			
@@ -354,6 +306,51 @@ public class readFile {
 		dbop.select(sql);
 	}
 
+	
+	void insertanswer() throws IOException
+	{
+		String file = "D://CODE/JavaWeb/Sqlite/src/com/sqllite/answer.txt";
+		br = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
+		int ch;
+		char c;
+		int i = 0;
+		while((ch=br.read())!=-1)
+		{
+			if(ch>=48&&ch<=57)
+			{
+				ch = br.read();
+				if(ch==65294||ch==46||ch==12289)
+				{
+					ch = br.read();
+					c = (char)ch;
+					
+					
+				
+					String s = String.valueOf(c);
+					System.out.print(i+". "+s+" ");
+					i++;
+					
+				}
+				else if(ch>=48&&ch<=57)
+				{
+					ch = br.read();
+					if(ch==65294||ch==46||ch==12289)
+					{
+						ch = br.read();
+						c = (char)ch;
+						String s = String.valueOf(c);
+						System.out.print(i+". "+s+" ");
+						i++;
+						
+					}
+				}
+			}
+		}
+		
+		
+	}
+	
+	
 
 
 }
